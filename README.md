@@ -1,6 +1,8 @@
 ## 📊 Data Visualization Portfolio
 This repository showcases a collection of data analytics projects developed during my internship at Bank Syariah Nasional (BSN), focusing on financial performance analysis, customer insights, and interactive dashboard development to support strategic decision-making.
 
+Note: The data used in these dashboards is synthetic (dummy data) that has been adjusted to resemble real-world conditions, allowing for realistic analysis without exposing sensitive information.
+
 ### 🏠 Housing Financing Ecosystem Dashboard
 Customer segmentation and behavior analysis for housing financing  
 🔗 https://datastudio.google.com/reporting/bacbc4b2-a776-46b6-b3ae-ab71997825d3
