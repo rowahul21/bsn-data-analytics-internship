@@ -26,7 +26,7 @@ To provide a comprehensive view of customer demographics, financial behavior, an
 - Data Cleaning & Transformation
 
 ## 🔗 Dashboard Link
-https://datastudio.google.com/reporting/bacbc4b2-a776-46b6-b3ae-ab71997825d3
+https://datastudio.google.com/reporting/c7e45c92-eaca-45d7-905b-5637efb97bf5
 
 ## 📈 Key Insights
 - 65% of housing loan customers are male
