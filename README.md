@@ -5,8 +5,8 @@ Note: The data used in these dashboards is synthetic (dummy data) that has been 
 
 ### 🏠 Housing Financing Ecosystem Dashboard
 Customer segmentation and behavior analysis for housing financing  
-🔗 https://datastudio.google.com/reporting/bacbc4b2-a776-46b6-b3ae-ab71997825d3
+🔗 https://datastudio.google.com/reporting/c7e45c92-eaca-45d7-905b-5637efb97bf5
 
 ### 📈 BSN 2025 Performance Dashboard
 Annual performance evaluation and branch-level analysis  
-🔗 https://datastudio.google.com/reporting/6a87fb01-8f43-4696-848b-47575d0642a7
+🔗 https://datastudio.google.com/reporting/5dbc5f5a-000e-4233-b353-bb6dc8e726c5
