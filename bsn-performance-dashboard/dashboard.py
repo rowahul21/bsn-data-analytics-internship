@@ -496,7 +496,7 @@ st.markdown(f"""
         overflow: visible;
     ">{label}</div>
     <div style="
-        font-size: clamp(14px, 1.5vw, 20px);
+        font-size: clamp(20px, 2vw, 25px);
         font-weight: 700;
         color: #006747;
         white-space: nowrap;
