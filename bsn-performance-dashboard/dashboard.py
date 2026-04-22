@@ -45,7 +45,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     /* Main background */
-    .main { background-color: #f7f9fc; }
+    .main { background-color: ##cccccc; }
 
     /* Metric cards */
     [data-testid="metric-container"] {
@@ -427,7 +427,8 @@ def safe_region_color_map(data_regions, color_map=REGION_COLOR_MAP,
 # ─────────────────────────────────────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("# 2025 Realization Dashboard")
+st.markdown("<h1 style='color:#006747;'>2025 Realization Dashboard</h1>",
+    unsafe_allow_html=True)
 st.markdown(
     f"<p style='color:#64748b;margin-top:-8px;font-size:14px;'>"
     f"Showing: <b>{sel_region}</b> · <b>{sel_branch}</b> · <b>{sel_sub}</b> · "
