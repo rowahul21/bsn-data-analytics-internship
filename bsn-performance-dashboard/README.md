@@ -25,7 +25,8 @@ To simplify annual performance analysis and support strategic evaluation through
 - Data Cleaning & Transformation
 
 ## 🔗 Dashboard Link
-https://datastudio.google.com/reporting/5dbc5f5a-000e-4233-b353-bb6dc8e726c5
+- https://datastudio.google.com/reporting/5dbc5f5a-000e-4233-b353-bb6dc8e726c5
+- https://realization-dashboard-2025.streamlit.app/
 
 ## 📈 Key Insights
 - Financing realization increased by **45% YoY**, from IDR 9.67B (2024) to IDR 14.07B (2025)
