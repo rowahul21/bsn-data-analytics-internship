@@ -68,9 +68,9 @@ st.markdown("""
 
     /* Section headers */
     .section-title {
-        font-size: 17px;
+        font-size: 20px;
         font-weight: 700;
-        color: #1e293b;
+        color: #007F58;
         margin-bottom: 4px;
         margin-top: 8px;
     }
