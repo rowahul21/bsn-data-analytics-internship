@@ -119,10 +119,11 @@ PRODUCT_COLORS = {
 }
 # REGION_COLORS = px.colors.qualitative.Set2
 REGION_COLOR_MAP = {
-    "Jakarta Jabar Banten": "#006747",     # paling kuat (core region)
-    "Jateng DIY Jatim Nusra": "#00bb31",   # secondary
-    "Kalimantan Sulawesi": "#90e474",      # lighter
-    "Sumatera": "#d9fbe3",                 # paling soft
+    REGION_COLOR_MAP = {
+    "Jakarta Jabar Banten": "#006747",
+    "Jateng DIY Jatim Nusra": "#00bb31",
+    "Sumatera": "#90e474",
+    "Kalimantan Sulawesi": "#d9fbe3",
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
