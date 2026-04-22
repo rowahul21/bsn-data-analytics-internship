@@ -4,7 +4,7 @@
 This dashboard provides a comprehensive evaluation of financing performance in 2025, enabling stakeholders to monitor achievement and identify performance gaps across branches.
 
 ## Dashboard Preview
-![Dashboard Preview](assets/realisasi-2025.png)
+![Dashboard Preview](assets/preview.png)
 
 ## Objective
 To simplify annual performance analysis and support strategic evaluation through centralized and interactive reporting.
