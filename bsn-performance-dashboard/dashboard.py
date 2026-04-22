@@ -4,10 +4,22 @@
 A Streamlit dashboard for analyzing branch and sub-branch performance
 across three loan products: Non KPR (S), KPR Subsidi (NS), KPR Non Subsidi (NK).
 
-Run with:
-    streamlit run dashboard.py
+Project folder structure (required for Streamlit Cloud deployment):
+──────────────────────────────────────────────────────────────────
+  bsn-performance-dashboard/
+  ├── dashboard.py          ← this script
+  ├── requirements.txt      ← pip dependencies
+  └── data/
+      └── DUMMY_Database.xlsx   ← data file lives here
 
-Make sure dummy_database.xlsx is in the same folder as this script.
+WHY this structure?
+  On Streamlit Cloud the working directory is the repo root, NOT the
+  folder that contains dashboard.py.  Using __file__ to build an
+  absolute path makes the code work identically locally AND in the cloud.
+
+Run locally:
+    cd bsn-performance-dashboard
+    streamlit run dashboard.py
 """
 
 import streamlit as st
@@ -16,6 +28,7 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from pathlib import Path   # ← used for deployment-safe file paths
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PAGE CONFIG
@@ -96,50 +109,144 @@ PRODUCT_COLORS = {
 REGION_COLORS = px.colors.qualitative.Set2
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DATA LOADING  (cached so Streamlit doesn't reload on every interaction)
+# FILE PATH  –  deployment-safe approach using __file__
+# ─────────────────────────────────────────────────────────────────────────────
+# WHY __file__ instead of a plain filename like "DUMMY_Database.xlsx"?
+#
+#   When you run a script locally, Python's working directory is wherever
+#   you opened your terminal — which usually matches the script's folder.
+#   So a plain filename happens to work.
+#
+#   On Streamlit Cloud, the server clones your entire GitHub repo, then
+#   sets the working directory to the REPO ROOT, not to the subfolder
+#   that contains dashboard.py.  So if your script is at:
+#       bsn-performance-dashboard/dashboard.py
+#   and your data is at:
+#       bsn-performance-dashboard/data/DUMMY_Database.xlsx
+#   then pd.read_excel("DUMMY_Database.xlsx") looks for the file at
+#   the repo root and raises FileNotFoundError.
+#
+#   The fix:  build the path relative to THIS script file (__file__),
+#   not relative to wherever Python happens to be running from.
+#
+#   Path(__file__).parent  →  the folder containing dashboard.py
+#   / "data"               →  step into the data/ subfolder
+#   / "DUMMY_Database.xlsx"→  the actual file
+#
+#   This always resolves to the right location on any machine or cloud server.
+
+# ── Where this script lives (works locally AND on Streamlit Cloud) ──
+THIS_DIR = Path(__file__).parent
+
+# ── Path to your data file — put the Excel file in a /data subfolder ──
+DATA_FILE = THIS_DIR / "data" / "DUMMY_Database.xlsx"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DATA PROCESSING  (separated from loading so it can be reused for uploads)
 # ─────────────────────────────────────────────────────────────────────────────
 @st.cache_data
-def load_data():
-    """Load and clean all sheets from the Excel file."""
-    sheets = pd.read_excel("dummy_database.xlsx", sheet_name=None)
+def process_sheets(sheets: dict):
+    """
+    Accepts a dict of DataFrames (one per sheet) and returns the three
+    cleaned DataFrames used by the dashboard.
 
+    Keeping processing separate from file I/O means we can call this
+    function whether the data came from disk OR from st.file_uploader.
+    """
     # ── Historical: monthly realization per branch & product ──
     hist = sheets["Historical"].copy()
-    hist["BULAN"] = pd.to_datetime(hist["BULAN"])
-    hist["MONTH"]      = hist["BULAN"].dt.month
-    hist["MONTH_NAME"] = hist["BULAN"].dt.strftime("%b")   # Jan, Feb …
-    hist["MONTH_LABEL"]= hist["BULAN"].dt.strftime("%b %Y")
+    hist["BULAN"]       = pd.to_datetime(hist["BULAN"])
+    hist["MONTH"]       = hist["BULAN"].dt.month
+    hist["MONTH_NAME"]  = hist["BULAN"].dt.strftime("%b")       # Jan, Feb …
+    hist["MONTH_LABEL"] = hist["BULAN"].dt.strftime("%b %Y")
 
     # ── ALL_FIKS: branch-level snapshot (with WILAYAH/region) ──
     all_fiks = sheets["ALL_FIKS"].copy()
-    # Derive totals
-    all_fiks["total_real_JT"]  = all_fiks["S_DES_25_(JT)"] + all_fiks["NS_DES_25_(JT)"] + all_fiks["NK_DES_25_(JT)"]
-    all_fiks["total_rkap_JT"]  = all_fiks["S_RKAP_25_(JT)"] + all_fiks["NS_RKAP_25_(JT)"] + all_fiks["NK_RKAP_25_(JT)"]
-    all_fiks["total_units"]     = all_fiks["S_DES_25_(U)"] + all_fiks["NS_DES_25_(U)"] + all_fiks["NK_DES_25_(U)"]
-    all_fiks["rkap_achieve_pct"]= (all_fiks["total_real_JT"] / all_fiks["total_rkap_JT"]).replace([np.inf, -np.inf], np.nan)
-    all_fiks["avg_deal_size"]   = (all_fiks["total_real_JT"] / all_fiks["total_units"]).replace([np.inf, -np.inf], np.nan)
-
-    # YoY: compare Dec 2025 vs Dec 2024
-    all_fiks["total_real_24_JT"] = all_fiks["S_DES_24_(JT)"] + all_fiks["NS_DES_24_(JT)"] + all_fiks["NK_DES_24_(JT)"]
+    all_fiks["total_real_JT"]   = all_fiks["S_DES_25_(JT)"]  + all_fiks["NS_DES_25_(JT)"]  + all_fiks["NK_DES_25_(JT)"]
+    all_fiks["total_rkap_JT"]   = all_fiks["S_RKAP_25_(JT)"] + all_fiks["NS_RKAP_25_(JT)"] + all_fiks["NK_RKAP_25_(JT)"]
+    all_fiks["total_units"]      = all_fiks["S_DES_25_(U)"]   + all_fiks["NS_DES_25_(U)"]   + all_fiks["NK_DES_25_(U)"]
+    all_fiks["rkap_achieve_pct"] = (all_fiks["total_real_JT"] / all_fiks["total_rkap_JT"]).replace([np.inf, -np.inf], np.nan)
+    all_fiks["avg_deal_size"]    = (all_fiks["total_real_JT"] / all_fiks["total_units"]).replace([np.inf, -np.inf], np.nan)
+    all_fiks["total_real_24_JT"] = all_fiks["S_DES_24_(JT)"]  + all_fiks["NS_DES_24_(JT)"]  + all_fiks["NK_DES_24_(JT)"]
     all_fiks["yoy_growth"]       = ((all_fiks["total_real_JT"] - all_fiks["total_real_24_JT"]) / all_fiks["total_real_24_JT"]).replace([np.inf, -np.inf], np.nan)
 
     # ── KCPS: sub-branch snapshot ──
     kcps = sheets["KCPS"].copy()
-    kcps["total_real_JT"] = kcps["S_DES_25_(JT)"] + kcps["NS_DES_25_(JT)"] + kcps["NK_DES_25_(JT)"]
-    kcps["total_units"]   = kcps["S_DES_25_(U)"] + kcps["NS_DES_25_(U)"] + kcps["NK_DES_25_(U)"]
+    kcps["total_real_JT"]    = kcps["S_DES_25_(JT)"] + kcps["NS_DES_25_(JT)"] + kcps["NK_DES_25_(JT)"]
+    kcps["total_units"]      = kcps["S_DES_25_(U)"]  + kcps["NS_DES_25_(U)"]  + kcps["NK_DES_25_(U)"]
     kcps["rkap_achieve_pct"] = (kcps["total_real_JT"] / (kcps["S_RKAP_25_(JT)"].fillna(0) + kcps["NS_RKAP_25_(JT)"].fillna(0) + kcps["NK_RKAP_25_(JT)"].fillna(0))).replace([np.inf, -np.inf], np.nan)
-    kcps["avg_deal_size"] = (kcps["total_real_JT"] / kcps["total_units"]).replace([np.inf, -np.inf], np.nan)
+    kcps["avg_deal_size"]    = (kcps["total_real_JT"] / kcps["total_units"]).replace([np.inf, -np.inf], np.nan)
 
-    # Merge WILAYAH into KCPS using ALL_FIKS
+    # ── Merge region label into KCPS and Historical ──
     branch_region = all_fiks[["KODE_KCS", "WILAYAH"]].drop_duplicates()
     kcps = kcps.merge(branch_region, on="KODE_KCS", how="left")
-
-    # Merge WILAYAH into hist
     hist = hist.merge(branch_region, on="KODE_KCS", how="left")
 
     return hist, all_fiks, kcps
 
-hist, all_fiks, kcps = load_data()
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DATA LOADING  –  tries bundled file first, falls back to file uploader
+# ─────────────────────────────────────────────────────────────────────────────
+def load_data(source):
+    """
+    Load all sheets from either a file path (Path object) or an
+    in-memory uploaded file (UploadedFile from st.file_uploader).
+    Returns the raw dict of DataFrames so process_sheets() can clean them.
+
+    Using a separate non-cached loader means st.cache_data on
+    process_sheets() still works — cache_data can't cache file handles.
+    """
+    return pd.read_excel(source, sheet_name=None)
+
+
+# ── Try to load the bundled data file ──────────────────────────────────────
+# Priority order:
+#   1. Bundled file at data/DUMMY_Database.xlsx  (works on Streamlit Cloud
+#      once the file is committed to the GitHub repo inside the data/ folder)
+#   2. File uploaded manually via st.file_uploader  (fallback — useful if
+#      you don't want to commit sensitive data to GitHub)
+
+if DATA_FILE.exists():
+    # ✅ Bundled file found — load silently
+    raw_sheets = load_data(DATA_FILE)
+    hist, all_fiks, kcps = process_sheets(raw_sheets)
+
+else:
+    # ⚠️ Bundled file NOT found — show a friendly uploader instead of crashing
+    st.warning(
+        "📂 **Data file not found** — `data/DUMMY_Database.xlsx` is missing from the app folder.\n\n"
+        "This usually means the file was not committed to the GitHub repository. "
+        "You can either:\n"
+        "- Add the file to `bsn-performance-dashboard/data/` in your repo, **or**\n"
+        "- Upload it manually below to continue.",
+        icon="⚠️",
+    )
+
+    uploaded = st.file_uploader(
+        "Upload DUMMY_Database.xlsx to continue",
+        type=["xlsx"],
+        help="Upload the same Excel file that was used to build this dashboard.",
+    )
+
+    if uploaded is None:
+        # Stop rendering — nothing else can work without data
+        st.info("👆 Please upload the Excel file to load the dashboard.")
+        st.stop()   # Halts execution cleanly; no scary error traceback shown
+
+    # File uploaded — process it exactly the same way as the bundled file
+    try:
+        raw_sheets = load_data(uploaded)
+        hist, all_fiks, kcps = process_sheets(raw_sheets)
+        st.success("✅ File uploaded and loaded successfully!")
+    except Exception as e:
+        st.error(
+            f"❌ Could not read the uploaded file.\n\n"
+            f"Make sure it is the correct DUMMY_Database.xlsx with sheets: "
+            f"**Historical**, **ALL_FIKS**, **KCPS**, **2025**.\n\n"
+            f"Technical detail: `{e}`"
+        )
+        st.stop()
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SIDEBAR FILTERS
@@ -600,7 +707,7 @@ with st.expander("📋 Sub-Branch Data Table", expanded=False):
 st.markdown("---")
 st.markdown(
     "<p style='text-align:center;color:#94a3b8;font-size:12px;'>"
-    "2025 Realization Dashboard · Data source: dummy_database.xlsx · "
+    "2025 Realization Dashboard · Data source: DUMMY_Database.xlsx · "
     "Products: Non KPR (S) · KPR Subsidi (NS) · KPR Non Subsidi (NK)"
     "</p>",
     unsafe_allow_html=True,

@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+venv/
+.venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NOTE: data/*.xlsx is intentionally NOT ignored
+# so DUMMY_Database.xlsx gets committed to the repo
+# and Streamlit Cloud can find it at runtime.
+# If the file contains sensitive data, use st.file_uploader
+# instead and add:  data/*.xlsx  to this file.
