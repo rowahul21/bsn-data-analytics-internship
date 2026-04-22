@@ -45,7 +45,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     /* Main background */
-    .main { background-color: #f7f9fc; }
+    .main { background-color: #f3f3f3; }
 
     /* Metric cards */
     [data-testid="metric-container"] {
@@ -65,6 +65,9 @@ st.markdown("""
         font-weight: 700;
         color: #1e293b !important;
     }
+    [data-testid="stMetricValue"] {
+    color: #006747 !important;
+    }
 
     /* Section headers */
     .section-title {
@@ -82,13 +85,22 @@ st.markdown("""
 
     /* Sidebar */
     [data-testid="stSidebar"] {
-        background-color: #1e293b;
+        background-color: #006747;
     }
-    [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
+    [data-testid="stSidebar"] * { color: #ffffff !important; }
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stMultiselect label {
         font-size: 13px;
         font-weight: 500;
+    }
+    
+    /* Card-Chart */
+    .chart-card {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 16px; /* biar ga lancip */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
     }
 
     /* Divider */
@@ -101,8 +113,8 @@ st.markdown("""
 # ─────────────────────────────────────────────────────────────────────────────
 # Product colors (consistent across all charts)
 PRODUCT_COLORS = {
-    "Non KPR":          "#3b82f6",   # blue
-    "KPR Subsidi":      "#10b981",   # green
+    "Non KPR":          "#006747",   # dark green
+    "KPR Subsidi":      "#90e474",   # green
     "KPR Non Subsidi":  "#f59e0b",   # amber
 }
 REGION_COLORS = px.colors.qualitative.Set2
@@ -333,7 +345,8 @@ def fmt_pct(val):
 # ─────────────────────────────────────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("# 2025 Realization Dashboard")
+st.markdown("<h1 style='color:#006747;'>2025 Realization Dashboard</h1>",
+    unsafe_allow_html=True)
 st.markdown(
     f"<p style='color:#64748b;margin-top:-8px;font-size:14px;'>"
     f"Showing: <b>{sel_region}</b> · <b>{sel_branch}</b> · <b>{sel_sub}</b> · "
@@ -394,7 +407,7 @@ fig_trend.update_layout(
     margin=dict(l=10, r=10, t=10, b=10),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     xaxis=dict(showgrid=False),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
 )
 st.plotly_chart(fig_trend, use_container_width=True)
 
@@ -425,7 +438,7 @@ fig_mom.update_layout(
     margin=dict(l=10, r=60, t=10, b=10),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     xaxis=dict(showgrid=False),
-    yaxis=dict(title="Realization (Jt)", showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(title="Realization (Jt)", showgrid=True, gridcolor="#e5e7eb"),
     yaxis2=dict(title="MoM Growth (%)", overlaying="y", side="right", showgrid=False, ticksuffix="%"),
 )
 st.plotly_chart(fig_mom, use_container_width=True)
@@ -460,7 +473,7 @@ fig_branch_bar.update_coloraxes(showscale=False)
 fig_branch_bar.update_layout(
     height=460, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 col_a.plotly_chart(fig_branch_bar, use_container_width=True)
@@ -481,7 +494,7 @@ fig_rkap.add_vline(x=100, line_width=2, line_dash="dash", line_color="#64748b", 
 fig_rkap.update_layout(
     height=460, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=60, t=10, b=10),
-    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 col_b.plotly_chart(fig_rkap, use_container_width=True)
@@ -506,7 +519,7 @@ fig_mix.update_layout(
     height=320, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
     xaxis=dict(showgrid=False, tickangle=45),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     barmode="stack",
 )
@@ -537,7 +550,7 @@ fig_sub_bar = px.bar(
 fig_sub_bar.update_layout(
     height=520, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
@@ -559,7 +572,7 @@ fig_sub_rkap.add_vline(x=100, line_width=2, line_dash="dash", line_color="#64748
 fig_sub_rkap.update_layout(
     height=520, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=70, t=10, b=10),
-    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 col_d.plotly_chart(fig_sub_rkap, use_container_width=True)
@@ -602,8 +615,8 @@ fig_bubble.add_shape(
 fig_bubble.update_layout(
     height=420, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 st.plotly_chart(fig_bubble, use_container_width=True)
@@ -625,7 +638,7 @@ fig_deal.update_layout(
     height=max(300, len(deal_df) * 22),
     plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=120, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 st.plotly_chart(fig_deal, use_container_width=True)
@@ -635,7 +648,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 6 – REGION SUMMARY
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">🗺️ Performance by Region (WILAYAH)</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Performance by Region (WILAYAH)</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Aggregated realization across the four operating regions</p>', unsafe_allow_html=True)
 
 reg_data = (
@@ -657,7 +670,7 @@ fig_reg_bar.update_layout(
     height=320, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
     xaxis=dict(showgrid=False, tickangle=15),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 col_e.plotly_chart(fig_reg_bar, use_container_width=True)
