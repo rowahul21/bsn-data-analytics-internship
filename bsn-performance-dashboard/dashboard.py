@@ -87,7 +87,7 @@ st.markdown("""
     [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stMultiselect label {
-        font-size: 13px;
+        font-size: 25px;
         font-weight: 500;
     }
 
