@@ -450,13 +450,70 @@ avg_yoy      = all_fiks_f["yoy_growth"].mean()
 avg_deal     = all_fiks_f["avg_deal_size"].mean()
 n_branches   = all_fiks_f["CABANG"].nunique()
 
-k1, k2, k3, k4, k5, k6 = st.columns(6)
-k1.metric("Total Realization",  fmt_jt(total_real))
-k2.metric("Total Units",        f"{total_units:,}")
-k3.metric("Active Branches",    str(n_branches))
-k4.metric("Avg RKAP Achieve",   fmt_pct(avg_rkap_pct) if not np.isnan(avg_rkap_pct) else "–")
-k5.metric("YoY Growth (Dec)",   fmt_pct(avg_yoy) if not np.isnan(avg_yoy) else "–")
-k6.metric("Avg Deal Size",      f"Rp {avg_deal:,.0f} Jt" if not np.isnan(avg_deal) else "–")
+# Format values — no ellipsis risk because we control the HTML container
+v_real   = fmt_jt(total_real)
+v_units  = f"{total_units:,}"
+v_branch = str(n_branches)
+v_rkap   = fmt_pct(avg_rkap_pct) if not np.isnan(avg_rkap_pct) else "–"
+v_yoy    = fmt_pct(avg_yoy)      if not np.isnan(avg_yoy)      else "–"
+v_deal   = f"Rp {avg_deal:,.0f} Jt" if not np.isnan(avg_deal) else "–"
+
+# ── Custom HTML scorecard row ────────────────────────────────────────────────
+# Why HTML instead of st.columns + st.metric?
+#   st.metric renders inside a fixed-width flex cell that Streamlit controls.
+#   When the value string is longer than the cell, Streamlit clips it with "…".
+#   By writing the cards ourselves in HTML we own the sizing completely:
+#   - Each card is a flex item that stretches to fill equal share of the row.
+#   - font-size uses clamp() so text scales down on narrow screens rather than
+#     wrapping or being cut off.
+#   - white-space:nowrap + overflow:visible means the text is NEVER clipped.
+st.markdown(f"""
+<div style="
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 8px;
+">
+  {"".join(f'''
+  <div style="
+      flex: 1 1 0;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 14px 14px 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+  ">
+    <div style="
+        font-size: clamp(10px, 1.1vw, 13px);
+        color: #64748b;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: visible;
+    ">{label}</div>
+    <div style="
+        font-size: clamp(14px, 1.5vw, 20px);
+        font-weight: 700;
+        color: #006747;
+        white-space: nowrap;
+        overflow: visible;
+        line-height: 1.2;
+    ">{value}</div>
+  </div>
+  ''' for label, value in [
+      ("Total Realization", v_real),
+      ("Total Units",       v_units),
+      ("Active Branches",   v_branch),
+      ("Avg RKAP Achieve",  v_rkap),
+      ("YoY Growth (Dec)",  v_yoy),
+      ("Avg Deal Size",     v_deal),
+  ])}
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 
