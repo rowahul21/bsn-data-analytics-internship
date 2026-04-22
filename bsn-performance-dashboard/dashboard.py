@@ -113,11 +113,17 @@ st.markdown("""
 # ─────────────────────────────────────────────────────────────────────────────
 # Product colors (consistent across all charts)
 PRODUCT_COLORS = {
-    "Non KPR":          "#006747",   # dark green
-    "KPR Subsidi":      "#90e474",   # green
-    "KPR Non Subsidi":  "#f59e0b",   # amber
+    "Non KPR":          "#f59e0b",   # amber
+    "KPR Subsidi":      "#006747",   # dark green
+    "KPR Non Subsidi":  "#90e474",   # green
 }
-REGION_COLORS = px.colors.qualitative.Set2
+# REGION_COLORS = px.colors.qualitative.Set2
+REGION_COLOR_MAP = {
+    "Jakarta Jabar Banten": "#006747",     # paling kuat (core region)
+    "Jateng DIY Jatim Nusra": "#00bb31",   # secondary
+    "Kalimantan Sulawesi": "#90e474",      # lighter
+    "Sumatera": "#d9fbe3",                 # paling soft
+}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FILE PATH  –  deployment-safe approach using __file__
@@ -420,7 +426,7 @@ fig_mom.add_bar(
     x=monthly_total["MONTH_LABEL"],
     y=monthly_total["REALISASI_JT"],
     name="Total Realization",
-    marker_color="#3b82f6",
+    marker_color="#006747",
     opacity=0.7,
 )
 fig_mom.add_scatter(
@@ -467,7 +473,7 @@ fig_branch_bar = px.bar(
     orientation="h",
     labels={"REALISASI_JT": "Realization (Jt)", "CABANG": ""},
     color="REALISASI_JT",
-    color_continuous_scale=["#bfdbfe", "#1d4ed8"],
+    color_continuous_scale=["#90e474", "#006747"],
 )
 fig_branch_bar.update_coloraxes(showscale=False)
 fig_branch_bar.update_layout(
@@ -544,7 +550,7 @@ fig_sub_bar = px.bar(
     x="total_real_JT", y="CABANG",
     orientation="h",
     color="WILAYAH",
-    color_discrete_sequence=REGION_COLORS,
+    color_discrete_sequence=REGION_COLOR_MAP,
     labels={"total_real_JT": "Realization (Jt)", "CABANG": "", "WILAYAH": "Region"},
 )
 fig_sub_bar.update_layout(
@@ -595,7 +601,7 @@ fig_bubble = px.scatter(
     size="avg_deal_size",
     color="WILAYAH",
     hover_name="CABANG",
-    color_discrete_sequence=REGION_COLORS,
+    color_discrete_sequence=REGION_COLOR_MAP,
     labels={
         "total_units":    "Total Units",
         "total_real_JT":  "Total Realization (Jt)",
@@ -679,7 +685,7 @@ reg_total = hist_f.groupby("WILAYAH")["REALISASI_JT"].sum().reset_index()
 fig_pie = px.pie(
     reg_total,
     names="WILAYAH", values="REALISASI_JT",
-    color_discrete_sequence=REGION_COLORS,
+    color_discrete_sequence=REGION_COLOR_MAP,
     hole=0.45,
 )
 fig_pie.update_traces(textposition="outside", textinfo="percent+label")
