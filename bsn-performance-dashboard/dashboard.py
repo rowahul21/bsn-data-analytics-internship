@@ -35,7 +35,6 @@ from pathlib import Path   # ← used for deployment-safe file paths
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="2025 Realization Dashboard",
-    page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -309,12 +308,12 @@ else:
 # SIDEBAR FILTERS
 # ─────────────────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🏦 Dashboard Filters")
+    st.markdown("## Dashboard Filters")
     st.markdown("---")
 
     # Region filter
     regions = ["All Regions"] + sorted(all_fiks["WILAYAH"].dropna().unique().tolist())
-    sel_region = st.selectbox("📍 Region (WILAYAH)", regions)
+    sel_region = st.selectbox("Region (WILAYAH)", regions)
 
     # Branch filter (cascades from region)
     if sel_region == "All Regions":
@@ -322,7 +321,7 @@ with st.sidebar:
     else:
         branch_options = sorted(all_fiks[all_fiks["WILAYAH"] == sel_region]["CABANG"].unique().tolist())
 
-    sel_branch = st.selectbox("🏢 Branch (KCS)", ["All Branches"] + branch_options)
+    sel_branch = st.selectbox("Branch (KCS)", ["All Branches"] + branch_options)
 
     # Sub-branch filter (cascades from branch)
     if sel_branch == "All Branches":
@@ -332,16 +331,16 @@ with st.sidebar:
         kcs_code = all_fiks[all_fiks["CABANG"] == sel_branch]["KODE_KCS"].values[0]
         sub_options = sorted(kcps[kcps["KODE_KCS"] == kcs_code]["CABANG"].unique().tolist())
 
-    sel_sub = st.selectbox("🏪 Sub-Branch (KCPS)", ["All Sub-Branches"] + sub_options)
+    sel_sub = st.selectbox("Sub-Branch (KCPS)", ["All Sub-Branches"] + sub_options)
 
     # Product filter
     st.markdown("---")
     product_options = ["Non KPR", "KPR Subsidi", "KPR Non Subsidi"]
-    sel_products = st.multiselect("📦 Product", product_options, default=product_options)
+    sel_products = st.multiselect("Product", product_options, default=product_options)
 
     # Month filter
     month_labels = sorted(hist["MONTH_LABEL"].unique().tolist(), key=lambda x: pd.to_datetime(x, format="%b %Y"))
-    sel_months = st.multiselect("📅 Months", month_labels, default=month_labels)
+    sel_months = st.multiselect("Months", month_labels, default=month_labels)
 
     st.markdown("---")
     st.markdown("<small style='color:#94a3b8'>Data: 2025 Realization<br>Branches: 35 | Sub-Branches: 118</small>", unsafe_allow_html=True)
@@ -391,7 +390,7 @@ def fmt_pct(val):
 # ─────────────────────────────────────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("# 🏦 2025 Realization Dashboard")
+st.markdown("# 2025 Realization Dashboard")
 st.markdown(
     f"<p style='color:#64748b;margin-top:-8px;font-size:14px;'>"
     f"Showing: <b>{sel_region}</b> · <b>{sel_branch}</b> · <b>{sel_sub}</b> · "
@@ -403,7 +402,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 – KPI SCORECARDS
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">📊 Key Performance Indicators</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Key Performance Indicators</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Cumulative 2025 figures based on current filters</p>', unsafe_allow_html=True)
 
 total_real   = hist_f["REALISASI_JT"].sum()
@@ -414,19 +413,19 @@ avg_deal     = all_fiks_f["avg_deal_size"].mean()
 n_branches   = all_fiks_f["CABANG"].nunique()
 
 k1, k2, k3, k4, k5, k6 = st.columns(6)
-k1.metric("💰 Total Realization",  fmt_jt(total_real))
-k2.metric("📦 Total Units",        f"{total_units:,}")
-k3.metric("🏢 Active Branches",    str(n_branches))
-k4.metric("🎯 Avg RKAP Achieve",   fmt_pct(avg_rkap_pct) if not np.isnan(avg_rkap_pct) else "–")
-k5.metric("📈 YoY Growth (Dec)",   fmt_pct(avg_yoy) if not np.isnan(avg_yoy) else "–")
-k6.metric("💡 Avg Deal Size",      f"Rp {avg_deal:,.0f} Jt" if not np.isnan(avg_deal) else "–")
+k1.metric("Total Realization",  fmt_jt(total_real))
+k2.metric("Total Units",        f"{total_units:,}")
+k3.metric("Active Branches",    str(n_branches))
+k4.metric("Avg RKAP Achieve",   fmt_pct(avg_rkap_pct) if not np.isnan(avg_rkap_pct) else "–")
+k5.metric("YoY Growth (Dec)",   fmt_pct(avg_yoy) if not np.isnan(avg_yoy) else "–")
+k6.metric("Avg Deal Size",      f"Rp {avg_deal:,.0f} Jt" if not np.isnan(avg_deal) else "–")
 
 st.markdown("---")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 2 – MONTHLY TREND
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">📈 Monthly Realization Trend</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Monthly Realization Trend</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Total realization (in Juta IDR) per month, split by product</p>', unsafe_allow_html=True)
 
 monthly = (
@@ -493,7 +492,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 3 – BRANCH COMPARISON
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">🏢 Branch Performance Comparison</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Branch Performance Comparison</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Full-year realization vs RKAP target per branch</p>', unsafe_allow_html=True)
 
 col_a, col_b = st.columns(2)
@@ -579,7 +578,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 4 – SUB-BRANCH COMPARISON
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">🏪 Sub-Branch Performance Comparison</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Sub-Branch Performance Comparison</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Realization and RKAP achievement across sub-branches (KCPS)</p>', unsafe_allow_html=True)
 
 col_c, col_d = st.columns(2)
@@ -638,7 +637,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 5 – ACQUISITION EFFICIENCY
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">⚡ Acquisition Efficiency</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Acquisition Efficiency</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Units acquired vs realization achieved — which branches do more with fewer units?</p>', unsafe_allow_html=True)
 
 eff_data = all_fiks_f[["CABANG", "WILAYAH", "total_units", "total_real_JT", "avg_deal_size", "rkap_achieve_pct"]].dropna()
@@ -706,7 +705,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 6 – REGION SUMMARY
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">🗺️ Performance by Region (WILAYAH)</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Performance by Region (WILAYAH)</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Aggregated realization across the four operating regions</p>', unsafe_allow_html=True)
 
 reg_data = (
@@ -757,7 +756,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 7 – DATA TABLE
 # ─────────────────────────────────────────────────────────────────────────────
-with st.expander("📋 Raw Branch Data Table", expanded=False):
+with st.expander("Raw Branch Data Table", expanded=False):
     display_cols = ["CABANG", "WILAYAH", "total_units", "total_real_JT", "total_rkap_JT",
                     "rkap_achieve_pct", "avg_deal_size", "yoy_growth"]
     tbl = all_fiks_f[display_cols].copy()
@@ -768,7 +767,7 @@ with st.expander("📋 Raw Branch Data Table", expanded=False):
     tbl = tbl.sort_values("Realization (Jt)", ascending=False).reset_index(drop=True)
     st.dataframe(tbl, use_container_width=True)
 
-with st.expander("📋 Sub-Branch Data Table", expanded=False):
+with st.expander("Sub-Branch Data Table", expanded=False):
     sub_tbl = kcps_f[["CABANG", "KODE_KCS", "WILAYAH", "total_units", "total_real_JT", "avg_deal_size", "rkap_achieve_pct"]].copy()
     sub_tbl.columns = ["Sub-Branch", "KCS Code", "Region", "Total Units", "Realization (Jt)", "Avg Deal Size (Jt)", "RKAP Achieve %"]
     sub_tbl["RKAP Achieve %"] = (sub_tbl["RKAP Achieve %"] * 100).round(1).astype(str) + "%"
