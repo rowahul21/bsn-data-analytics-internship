@@ -35,7 +35,6 @@ from pathlib import Path   # ← used for deployment-safe file paths
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="2025 Realization Dashboard",
-    page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -46,7 +45,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     /* Main background */
-    .main { background-color: #f7f9fc; }
+    .main { background-color: #f3f3f3; }
 
     /* Metric cards */
     [data-testid="metric-container"] {
@@ -66,6 +65,9 @@ st.markdown("""
         font-weight: 700;
         color: #1e293b !important;
     }
+    [data-testid="stMetricValue"] {
+    color: #006747 !important;
+    }
 
     /* Section headers */
     .section-title {
@@ -83,13 +85,22 @@ st.markdown("""
 
     /* Sidebar */
     [data-testid="stSidebar"] {
-        background-color: #1e293b;
+        background-color: #006747;
     }
-    [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
+    [data-testid="stSidebar"] * { color: #ffffff !important; }
     [data-testid="stSidebar"] .stSelectbox label,
     [data-testid="stSidebar"] .stMultiselect label {
         font-size: 13px;
         font-weight: 500;
+    }
+    
+    /* Card-Chart */
+    .chart-card {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 16px; /* biar ga lancip */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
     }
 
     /* Divider */
@@ -98,72 +109,21 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# GLOBAL COLOR THEME
+# COLOR PALETTE
 # ─────────────────────────────────────────────────────────────────────────────
-#
-# HOW TO USE THIS SECTION:
-#   All colors in the entire dashboard are defined here and ONLY here.
-#   Charts reference these dictionaries instead of hardcoding hex values.
-#   To change a color → edit it here once, all charts update automatically.
-#   To add a new region → add one line to REGION_COLOR_MAP, nothing else.
-#
-# ── Brand anchor ──────────────────────────────────────────────────────────
-BSN_GREEN   = "#006747"   # BSN primary brand color — used as anchor for theme
-
-# ── Product color map  ────────────────────────────────────────────────────
-# Plotly px charts accept color_discrete_map=PRODUCT_COLORS  (dict, key = label)
-# Each product always appears in the same color across every chart.
-#
-#   Non KPR         → Amber  : warm, energetic — largest product by volume
-#   KPR Subsidi     → BSN Green : brand color  — government-backed product
-#   KPR Non Subsidi → Blue   : cool, stable    — smaller / premium segment
-#
+# Product colors (consistent across all charts)
 PRODUCT_COLORS = {
-    "Non KPR":          "#F59E0B",   # amber      H=38°
-    "KPR Subsidi":      "#006747",   # BSN green  H=161°
-    "KPR Non Subsidi":  "#2563EB",   # blue       H=221°
+    "Non KPR":          "#f59e0b",   # amber
+    "KPR Subsidi":      "#006747",   # dark green
+    "KPR Non Subsidi":  "#90e474",   # green
 }
-
-# ── Region color map  ─────────────────────────────────────────────────────
-# Plotly px charts accept color_discrete_map=REGION_COLOR_MAP (dict, key = label)
-#
-# Design rule: hues are spread ~90–130° apart on the color wheel so each
-# region is instantly distinguishable even in small legends or on projectors.
-#
-#   Jakarta Jabar Banten    → BSN Green H=161°  (dominant region → brand color)
-#   Jateng DIY Jatim Nusra  → Amber     H=38°   (Δ123° from green)
-#   Sumatera                → Blue      H=221°   (Δ60°  from amber)
-#   Kalimantan Sulawesi     → Red/Coral H=0°     (Δ139° from blue)
-#
-# Adding a new region? Just add a new line here:
-#   "Papua": "#06B6D4",   # teal H=189°
-#
+# REGION_COLORS = px.colors.qualitative.Set2
 REGION_COLOR_MAP = {
-    "Jakarta Jabar Banten":    "#006747",   # BSN green
-    "Jateng DIY Jatim Nusra":  "#F59E0B",   # amber
-    "Sumatera":                "#2563EB",   # blue
-    "Kalimantan Sulawesi":     "#DC2626",   # red
+    "Jakarta Jabar Banten": "#006747",
+    "Jateng DIY Jatim Nusra": "#00bb31",
+    "Sumatera": "#90e474",
+    "Kalimantan Sulawesi": "#d9fbe3",
 }
-
-# Convenience: ordered list of region colors (same order as the dict above).
-# Use this ONLY when a Plotly chart doesn't support color_discrete_map,
-# e.g., px.pie with color_discrete_sequence=REGION_COLOR_SEQ.
-# ⚠️  Do NOT pass the dict REGION_COLOR_MAP to color_discrete_sequence —
-#     Plotly expects a list there, not a dict, and will silently ignore it.
-REGION_COLOR_SEQ = list(REGION_COLOR_MAP.values())
-
-# ── Semantic / status colors  ─────────────────────────────────────────────
-# Used for RKAP hit/miss coloring and MoM trend line.
-# Keeping these in the theme means they can be updated consistently too.
-COLOR_POSITIVE  = "#006747"   # BSN green — target met     (≥ 100 % RKAP)
-COLOR_NEGATIVE  = "#EF4444"   # red       — target missed  (< 100 % RKAP)
-COLOR_MOM_LINE  = "#EF4444"   # red line  — MoM trend overlay on bar chart
-COLOR_MOM_BAR   = "#006747"   # BSN green — monthly total bars
-
-# ── Continuous (gradient) color scale  ────────────────────────────────────
-# Used for single-metric bar charts where bar height/length = the color value.
-# Low → High maps light green tint → BSN dark green.
-GRADIENT_SCALE  = ["#A7F3D0", BSN_GREEN]   # light mint → BSN green
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FILE PATH  –  deployment-safe approach using __file__
@@ -309,12 +269,12 @@ else:
 # SIDEBAR FILTERS
 # ─────────────────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🏦 Dashboard Filters")
+    st.markdown("## Dashboard Filters")
     st.markdown("---")
 
     # Region filter
     regions = ["All Regions"] + sorted(all_fiks["WILAYAH"].dropna().unique().tolist())
-    sel_region = st.selectbox("📍 Region (WILAYAH)", regions)
+    sel_region = st.selectbox("Region (WILAYAH)", regions)
 
     # Branch filter (cascades from region)
     if sel_region == "All Regions":
@@ -322,7 +282,7 @@ with st.sidebar:
     else:
         branch_options = sorted(all_fiks[all_fiks["WILAYAH"] == sel_region]["CABANG"].unique().tolist())
 
-    sel_branch = st.selectbox("🏢 Branch (KCS)", ["All Branches"] + branch_options)
+    sel_branch = st.selectbox("Branch (KCS)", ["All Branches"] + branch_options)
 
     # Sub-branch filter (cascades from branch)
     if sel_branch == "All Branches":
@@ -332,16 +292,16 @@ with st.sidebar:
         kcs_code = all_fiks[all_fiks["CABANG"] == sel_branch]["KODE_KCS"].values[0]
         sub_options = sorted(kcps[kcps["KODE_KCS"] == kcs_code]["CABANG"].unique().tolist())
 
-    sel_sub = st.selectbox("🏪 Sub-Branch (KCPS)", ["All Sub-Branches"] + sub_options)
+    sel_sub = st.selectbox("Sub-Branch (KCPS)", ["All Sub-Branches"] + sub_options)
 
     # Product filter
     st.markdown("---")
     product_options = ["Non KPR", "KPR Subsidi", "KPR Non Subsidi"]
-    sel_products = st.multiselect("📦 Product", product_options, default=product_options)
+    sel_products = st.multiselect("Product", product_options, default=product_options)
 
     # Month filter
     month_labels = sorted(hist["MONTH_LABEL"].unique().tolist(), key=lambda x: pd.to_datetime(x, format="%b %Y"))
-    sel_months = st.multiselect("📅 Months", month_labels, default=month_labels)
+    sel_months = st.multiselect("Months", month_labels, default=month_labels)
 
     st.markdown("---")
     st.markdown("<small style='color:#94a3b8'>Data: 2025 Realization<br>Branches: 35 | Sub-Branches: 118</small>", unsafe_allow_html=True)
@@ -391,7 +351,8 @@ def fmt_pct(val):
 # ─────────────────────────────────────────────────────────────────────────────
 # HEADER
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("# 🏦 2025 Realization Dashboard")
+st.markdown("<h1 style='color:#006747;'>2025 Realization Dashboard</h1>",
+    unsafe_allow_html=True)
 st.markdown(
     f"<p style='color:#64748b;margin-top:-8px;font-size:14px;'>"
     f"Showing: <b>{sel_region}</b> · <b>{sel_branch}</b> · <b>{sel_sub}</b> · "
@@ -403,7 +364,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 1 – KPI SCORECARDS
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">📊 Key Performance Indicators</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Key Performance Indicators</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Cumulative 2025 figures based on current filters</p>', unsafe_allow_html=True)
 
 total_real   = hist_f["REALISASI_JT"].sum()
@@ -414,19 +375,19 @@ avg_deal     = all_fiks_f["avg_deal_size"].mean()
 n_branches   = all_fiks_f["CABANG"].nunique()
 
 k1, k2, k3, k4, k5, k6 = st.columns(6)
-k1.metric("💰 Total Realization",  fmt_jt(total_real))
-k2.metric("📦 Total Units",        f"{total_units:,}")
-k3.metric("🏢 Active Branches",    str(n_branches))
-k4.metric("🎯 Avg RKAP Achieve",   fmt_pct(avg_rkap_pct) if not np.isnan(avg_rkap_pct) else "–")
-k5.metric("📈 YoY Growth (Dec)",   fmt_pct(avg_yoy) if not np.isnan(avg_yoy) else "–")
-k6.metric("💡 Avg Deal Size",      f"Rp {avg_deal:,.0f} Jt" if not np.isnan(avg_deal) else "–")
+k1.metric("Total Realization",  fmt_jt(total_real))
+k2.metric("Total Units",        f"{total_units:,}")
+k3.metric("Active Branches",    str(n_branches))
+k4.metric("Avg RKAP Achieve",   fmt_pct(avg_rkap_pct) if not np.isnan(avg_rkap_pct) else "–")
+k5.metric("YoY Growth (Dec)",   fmt_pct(avg_yoy) if not np.isnan(avg_yoy) else "–")
+k6.metric("Avg Deal Size",      f"Rp {avg_deal:,.0f} Jt" if not np.isnan(avg_deal) else "–")
 
 st.markdown("---")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 2 – MONTHLY TREND
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">📈 Monthly Realization Trend</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Monthly Realization Trend</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Total realization (in Juta IDR) per month, split by product</p>', unsafe_allow_html=True)
 
 monthly = (
@@ -452,7 +413,7 @@ fig_trend.update_layout(
     margin=dict(l=10, r=10, t=10, b=10),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     xaxis=dict(showgrid=False),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
 )
 st.plotly_chart(fig_trend, use_container_width=True)
 
@@ -465,7 +426,7 @@ fig_mom.add_bar(
     x=monthly_total["MONTH_LABEL"],
     y=monthly_total["REALISASI_JT"],
     name="Total Realization",
-    marker_color=COLOR_MOM_BAR,   # ← was hardcoded "#3b82f6" (blue, off-theme)
+    marker_color="#006747",
     opacity=0.7,
 )
 fig_mom.add_scatter(
@@ -474,7 +435,7 @@ fig_mom.add_scatter(
     name="MoM Growth (%)",
     yaxis="y2",
     mode="lines+markers",
-    line=dict(color=COLOR_MOM_LINE, width=2),   # ← was hardcoded "#ef4444"
+    line=dict(color="#ef4444", width=2),
     marker=dict(size=7),
 )
 fig_mom.update_layout(
@@ -483,7 +444,7 @@ fig_mom.update_layout(
     margin=dict(l=10, r=60, t=10, b=10),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     xaxis=dict(showgrid=False),
-    yaxis=dict(title="Realization (Jt)", showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(title="Realization (Jt)", showgrid=True, gridcolor="#e5e7eb"),
     yaxis2=dict(title="MoM Growth (%)", overlaying="y", side="right", showgrid=False, ticksuffix="%"),
 )
 st.plotly_chart(fig_mom, use_container_width=True)
@@ -493,7 +454,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 3 – BRANCH COMPARISON
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">🏢 Branch Performance Comparison</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Branch Performance Comparison</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Full-year realization vs RKAP target per branch</p>', unsafe_allow_html=True)
 
 col_a, col_b = st.columns(2)
@@ -512,24 +473,20 @@ fig_branch_bar = px.bar(
     orientation="h",
     labels={"REALISASI_JT": "Realization (Jt)", "CABANG": ""},
     color="REALISASI_JT",
-    color_continuous_scale=GRADIENT_SCALE,   # ← was hardcoded ["#bfdbfe","#1d4ed8"] (blue, off-theme)
+    color_continuous_scale=["#90e474", "#006747"],
 )
 fig_branch_bar.update_coloraxes(showscale=False)
 fig_branch_bar.update_layout(
     height=460, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 col_a.plotly_chart(fig_branch_bar, use_container_width=True)
 
 # Chart B: RKAP achievement % per branch
 rkap_data = all_fiks_f[["CABANG", "rkap_achieve_pct"]].dropna().sort_values("rkap_achieve_pct", ascending=True)
-# Color each bar green (target met) or red (target missed) using theme constants.
-# ← was hardcoded "#10b981" / "#ef4444" inline
-rkap_data["color"] = rkap_data["rkap_achieve_pct"].apply(
-    lambda x: COLOR_POSITIVE if x >= 1.0 else COLOR_NEGATIVE
-)
+rkap_data["color"] = rkap_data["rkap_achieve_pct"].apply(lambda x: "#10b981" if x >= 1.0 else "#ef4444")
 
 fig_rkap = go.Figure(go.Bar(
     x=rkap_data["rkap_achieve_pct"] * 100,
@@ -543,7 +500,7 @@ fig_rkap.add_vline(x=100, line_width=2, line_dash="dash", line_color="#64748b", 
 fig_rkap.update_layout(
     height=460, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=60, t=10, b=10),
-    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 col_b.plotly_chart(fig_rkap, use_container_width=True)
@@ -568,7 +525,7 @@ fig_mix.update_layout(
     height=320, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
     xaxis=dict(showgrid=False, tickangle=45),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     barmode="stack",
 )
@@ -579,7 +536,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 4 – SUB-BRANCH COMPARISON
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">🏪 Sub-Branch Performance Comparison</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Sub-Branch Performance Comparison</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Realization and RKAP achievement across sub-branches (KCPS)</p>', unsafe_allow_html=True)
 
 col_c, col_d = st.columns(2)
@@ -593,17 +550,13 @@ fig_sub_bar = px.bar(
     x="total_real_JT", y="CABANG",
     orientation="h",
     color="WILAYAH",
-    # color_discrete_map ensures each region name maps to its fixed color.
-    # ← was color_discrete_sequence=REGION_COLORS (Set2 palette — random order,
-    #   no name binding, and a dict was incorrectly passed as a sequence which
-    #   Plotly silently ignores, producing wrong or default colors).
-    color_discrete_map=REGION_COLOR_MAP,
+    color_discrete_sequence=REGION_COLOR_MAP,
     labels={"total_real_JT": "Realization (Jt)", "CABANG": "", "WILAYAH": "Region"},
 )
 fig_sub_bar.update_layout(
     height=520, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
@@ -611,10 +564,7 @@ col_c.plotly_chart(fig_sub_bar, use_container_width=True)
 
 # Sub-branch RKAP achievement
 sub_rkap = kcps_f[["CABANG", "rkap_achieve_pct"]].dropna().sort_values("rkap_achieve_pct", ascending=True).tail(25)
-# ← was hardcoded "#10b981" / "#ef4444" inline
-sub_rkap["color"] = sub_rkap["rkap_achieve_pct"].apply(
-    lambda x: COLOR_POSITIVE if x >= 1.0 else COLOR_NEGATIVE
-)
+sub_rkap["color"] = sub_rkap["rkap_achieve_pct"].apply(lambda x: "#10b981" if x >= 1.0 else "#ef4444")
 
 fig_sub_rkap = go.Figure(go.Bar(
     x=sub_rkap["rkap_achieve_pct"] * 100,
@@ -628,7 +578,7 @@ fig_sub_rkap.add_vline(x=100, line_width=2, line_dash="dash", line_color="#64748
 fig_sub_rkap.update_layout(
     height=520, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=70, t=10, b=10),
-    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(title="RKAP Achievement (%)", showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 col_d.plotly_chart(fig_sub_rkap, use_container_width=True)
@@ -638,7 +588,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 5 – ACQUISITION EFFICIENCY
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">⚡ Acquisition Efficiency</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Acquisition Efficiency</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Units acquired vs realization achieved — which branches do more with fewer units?</p>', unsafe_allow_html=True)
 
 eff_data = all_fiks_f[["CABANG", "WILAYAH", "total_units", "total_real_JT", "avg_deal_size", "rkap_achieve_pct"]].dropna()
@@ -651,9 +601,7 @@ fig_bubble = px.scatter(
     size="avg_deal_size",
     color="WILAYAH",
     hover_name="CABANG",
-    # color_discrete_map binds each region name to its fixed color.
-    # ← was color_discrete_sequence=REGION_COLORS (same bug as fig_sub_bar)
-    color_discrete_map=REGION_COLOR_MAP,
+    color_discrete_sequence=REGION_COLOR_MAP,
     labels={
         "total_units":    "Total Units",
         "total_real_JT":  "Total Realization (Jt)",
@@ -673,8 +621,8 @@ fig_bubble.add_shape(
 fig_bubble.update_layout(
     height=420, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 st.plotly_chart(fig_bubble, use_container_width=True)
@@ -687,7 +635,7 @@ fig_deal = px.bar(
     x="avg_deal_size", y="CABANG",
     orientation="h",
     color="avg_deal_size",
-    color_continuous_scale=GRADIENT_SCALE,   # ← was ["#bfdbfe","#1d4ed8"] (blue, off-theme)
+    color_continuous_scale=["#bfdbfe", "#1d4ed8"],
     labels={"avg_deal_size": "Avg Deal Size (Jt)", "CABANG": ""},
     text=deal_df["avg_deal_size"].apply(lambda x: f"Rp {x:,.0f} Jt"),
 )
@@ -696,7 +644,7 @@ fig_deal.update_layout(
     height=max(300, len(deal_df) * 22),
     plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=120, t=10, b=10),
-    xaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    xaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     yaxis=dict(showgrid=False),
 )
 st.plotly_chart(fig_deal, use_container_width=True)
@@ -706,7 +654,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 6 – REGION SUMMARY
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown('<p class="section-title">🗺️ Performance by Region (WILAYAH)</p>', unsafe_allow_html=True)
+st.markdown('<p class="section-title">Performance by Region (WILAYAH)</p>', unsafe_allow_html=True)
 st.markdown('<p class="section-sub">Aggregated realization across the four operating regions</p>', unsafe_allow_html=True)
 
 reg_data = (
@@ -728,7 +676,7 @@ fig_reg_bar.update_layout(
     height=320, plot_bgcolor="white", paper_bgcolor="white",
     margin=dict(l=10, r=10, t=10, b=10),
     xaxis=dict(showgrid=False, tickangle=15),
-    yaxis=dict(showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(showgrid=True, gridcolor="#e5e7eb"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
 )
 col_e.plotly_chart(fig_reg_bar, use_container_width=True)
@@ -737,11 +685,7 @@ reg_total = hist_f.groupby("WILAYAH")["REALISASI_JT"].sum().reset_index()
 fig_pie = px.pie(
     reg_total,
     names="WILAYAH", values="REALISASI_JT",
-    # px.pie supports color_discrete_map — use it so each region name
-    # is reliably bound to its fixed color regardless of row order.
-    # ← was color_discrete_sequence=REGION_COLORS (Set2 variable, unrelated to theme,
-    #   AND a dict was previously passed here which Plotly silently ignores)
-    color_discrete_map=REGION_COLOR_MAP,
+    color_discrete_sequence=REGION_COLOR_MAP,
     hole=0.45,
 )
 fig_pie.update_traces(textposition="outside", textinfo="percent+label")
@@ -757,7 +701,7 @@ st.markdown("---")
 # ─────────────────────────────────────────────────────────────────────────────
 # SECTION 7 – DATA TABLE
 # ─────────────────────────────────────────────────────────────────────────────
-with st.expander("📋 Raw Branch Data Table", expanded=False):
+with st.expander("Raw Branch Data Table", expanded=False):
     display_cols = ["CABANG", "WILAYAH", "total_units", "total_real_JT", "total_rkap_JT",
                     "rkap_achieve_pct", "avg_deal_size", "yoy_growth"]
     tbl = all_fiks_f[display_cols].copy()
@@ -768,7 +712,7 @@ with st.expander("📋 Raw Branch Data Table", expanded=False):
     tbl = tbl.sort_values("Realization (Jt)", ascending=False).reset_index(drop=True)
     st.dataframe(tbl, use_container_width=True)
 
-with st.expander("📋 Sub-Branch Data Table", expanded=False):
+with st.expander("Sub-Branch Data Table", expanded=False):
     sub_tbl = kcps_f[["CABANG", "KODE_KCS", "WILAYAH", "total_units", "total_real_JT", "avg_deal_size", "rkap_achieve_pct"]].copy()
     sub_tbl.columns = ["Sub-Branch", "KCS Code", "Region", "Total Units", "Realization (Jt)", "Avg Deal Size (Jt)", "RKAP Achieve %"]
     sub_tbl["RKAP Achieve %"] = (sub_tbl["RKAP Achieve %"] * 100).round(1).astype(str) + "%"
