@@ -544,6 +544,8 @@ col_c, col_d = st.columns(2)
 # Sub-branch realization (top 25)
 sub_real = kcps_f[["CABANG", "total_real_JT", "WILAYAH"]].dropna(subset=["total_real_JT"])
 sub_real = sub_real.sort_values("total_real_JT", ascending=True).tail(25)
+sub_real["WILAYAH"] = sub_real["WILAYAH"].str.strip()
+st.write("DEBUG WILAYAH:", sub_real["WILAYAH"].unique())
 
 fig_sub_bar = px.bar(
     sub_real,
