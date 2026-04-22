@@ -149,6 +149,8 @@ REGION_COLOR_MAP = {
 # e.g., px.pie with color_discrete_sequence=REGION_COLOR_SEQ.
 # ⚠️  Do NOT pass the dict REGION_COLOR_MAP to color_discrete_sequence —
 #     Plotly expects a list there, not a dict, and will silently ignore it.
+# ⚠️  Do NOT use this for px.pie — use color="WILAYAH" + color_discrete_map
+#     instead, so colors are bound by name and not by row position.
 REGION_COLOR_SEQ = list(REGION_COLOR_MAP.values())
 
 # ── Semantic / status colors  ─────────────────────────────────────────────
@@ -386,6 +388,41 @@ def fmt_jt(val):
 
 def fmt_pct(val):
     return f"{val*100:.1f}%"
+
+def safe_region_color_map(data_regions, color_map=REGION_COLOR_MAP,
+                          fallback="#94a3b8"):
+    """
+    Build a complete {region: color} dict that covers every region actually
+    present in the currently-filtered data.
+
+    WHY this exists:
+      When the user applies a sidebar filter, hist_f may contain only 1 or 2
+      regions instead of all 4.  Passing REGION_COLOR_MAP directly still works
+      for those regions — Plotly ignores unused keys — so this function is
+      mainly a safety net for a different problem: if a region name in the data
+      does NOT exist in REGION_COLOR_MAP (e.g. a new branch was added to the
+      dataset but not yet to the theme dict), Plotly silently falls back to its
+      default D3 palette and the color becomes inconsistent.
+
+      This function catches that case and applies a neutral fallback color
+      (#94a3b8 slate-gray) instead of letting Plotly pick something random.
+
+    Args:
+        data_regions : iterable of region name strings from the current df
+        color_map    : the master dict (defaults to REGION_COLOR_MAP)
+        fallback     : hex color for any region not in color_map
+
+    Returns:
+        dict  {region_name: hex_color}  — one entry per region in data_regions
+
+    Usage:
+        # Instead of:  color_discrete_map=REGION_COLOR_MAP
+        # Write:       color_discrete_map=safe_region_color_map(df["WILAYAH"].unique())
+    """
+    result = {}
+    for region in data_regions:
+        result[region] = color_map.get(region, fallback)
+    return result
 
 # ─────────────────────────────────────────────────────────────────────────────
 # HEADER
@@ -740,7 +777,11 @@ fig_pie = px.pie(
     # is reliably bound to its fixed color regardless of row order.
     # ← was color_discrete_sequence=REGION_COLORS (Set2 variable, unrelated to theme,
     #   AND a dict was previously passed here which Plotly silently ignores)
-    color_discrete_map=REGION_COLOR_MAP,
+    # Rule to remember:
+    #   color_discrete_map only works when color= points to a column whose
+    #   values match the keys of your map dict.
+    color="WILAYAH",
+    color_discrete_map=safe_region_color_map(reg_total["WILAYAH"].unique()),
     hole=0.45,
 )
 fig_pie.update_traces(textposition="outside", textinfo="percent+label")
