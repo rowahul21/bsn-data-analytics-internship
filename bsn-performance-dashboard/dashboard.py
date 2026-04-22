@@ -68,7 +68,7 @@ st.markdown("""
 
     /* Section headers */
     .section-title {
-        font-size: 20px;
+        font-size: 23px;
         font-weight: 700;
         color: #007F58;
         margin-bottom: 4px;
@@ -82,7 +82,7 @@ st.markdown("""
 
     /* Sidebar */
     [data-testid="stSidebar"] {
-        background-color: #1e293b;
+        background-color: #007F58;
     }
     [data-testid="stSidebar"] * { color: #e2e8f0 !important; }
     [data-testid="stSidebar"] .stSelectbox label,
