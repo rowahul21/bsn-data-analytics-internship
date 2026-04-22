@@ -118,9 +118,9 @@ BSN_GREEN   = "#006747"   # BSN primary brand color — used as anchor for theme
 #   KPR Non Subsidi → Blue   : cool, stable    — smaller / premium segment
 #
 PRODUCT_COLORS = {
-    "Non KPR":          "#F59E0B",   # amber      H=38°
+    "Non KPR":          "#a2da41",   # amber      H=38°
     "KPR Subsidi":      "#006747",   # BSN green  H=161°
-    "KPR Non Subsidi":  "#2563EB",   # blue       H=221°
+    "KPR Non Subsidi":  "#00bb31",   # blue       H=221°
 }
 
 # ── Region color map  ─────────────────────────────────────────────────────
