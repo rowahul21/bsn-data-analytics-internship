@@ -7,7 +7,7 @@ across three loan products: Non KPR (S), KPR Subsidi (NS), KPR Non Subsidi (NK).
 Run with:
     streamlit run dashboard.py
 
-Make sure DUMMY_Database.xlsx is in the same folder as this script.
+Make sure dummy_database.xlsx is in the same folder as this script.
 """
 
 import streamlit as st
@@ -101,7 +101,7 @@ REGION_COLORS = px.colors.qualitative.Set2
 @st.cache_data
 def load_data():
     """Load and clean all sheets from the Excel file."""
-    sheets = pd.read_excel("DUMMY_Database.xlsx", sheet_name=None)
+    sheets = pd.read_excel("dummy_database.xlsx", sheet_name=None)
 
     # ── Historical: monthly realization per branch & product ──
     hist = sheets["Historical"].copy()
@@ -600,7 +600,7 @@ with st.expander("📋 Sub-Branch Data Table", expanded=False):
 st.markdown("---")
 st.markdown(
     "<p style='text-align:center;color:#94a3b8;font-size:12px;'>"
-    "2025 Realization Dashboard · Data source: DUMMY_Database.xlsx · "
+    "2025 Realization Dashboard · Data source: dummy_database.xlsx · "
     "Products: Non KPR (S) · KPR Subsidi (NS) · KPR Non Subsidi (NK)"
     "</p>",
     unsafe_allow_html=True,
