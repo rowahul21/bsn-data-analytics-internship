@@ -32,8 +32,9 @@ To simplify annual performance analysis and support strategic evaluation through
 - https://realization-dashboard-2025.streamlit.app/
 
 ## Key Insights
-- Financing realization increased by **45% YoY**, from IDR 9.67B (2024) to IDR 14.07B (2025)
+- Financing realization increased by **28% YoY**, from IDR 10.19B (2024) to IDR 13.09B (2025)
 - Performance breakdown highlights variation across branches in both realization and outstanding position
+- Subsidized Mortgages dominated the overall volume, while the Non-Mortgage segment delivered the highest YoY growth, with top performance heavily concentrated in Jabodetabek and West Java branches
 - Ticket size analysis reveals efficiency differences:
   - Some branches achieve high realization with fewer units (efficient strategy)
   - Others rely on higher volume (high effort approach)
